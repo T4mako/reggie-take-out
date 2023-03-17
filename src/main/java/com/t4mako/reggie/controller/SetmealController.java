@@ -14,6 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.annotations.Delete;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 import javax.xml.ws.Service;
@@ -40,6 +42,8 @@ public class SetmealController {
 
     //新增套餐
     @PostMapping
+    @DeleteMapping
+    @CacheEvict(value = "setmealCache",allEntries = true)
     public R<String> save(@RequestBody SetmealDto setmealDto){
         log.info("test");
         setmealService.saveWithDish(setmealDto);
@@ -82,7 +86,9 @@ public class SetmealController {
     }
 
     //删除套餐
+    //allEntries = true,删除这个分类（value）下所有的缓存数据
     @DeleteMapping
+    @CacheEvict(value = "setmealCache",allEntries = true)
     public R<String> delete(@RequestParam List<Long> ids){
         setmealService.removeWithDish(ids);
         return R.success("套餐数据删除成功");
@@ -126,6 +132,7 @@ public class SetmealController {
 
     //根据条件查询套餐数据
     @GetMapping("list")
+    @Cacheable(value = "setmealCache" , key = "#setmeal.categoryId + '_' + #setmeal.status")
     public R<List<Setmeal>> list(Setmeal setmeal){
         LambdaQueryWrapper<Setmeal> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(setmeal.getCategoryId() != null,Setmeal::getCategoryId,setmeal.getCategoryId());

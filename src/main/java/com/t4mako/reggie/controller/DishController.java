@@ -174,6 +174,7 @@ public class DishController {
         }).collect(Collectors.toList());
 
         //将菜品缓存到redis
+        //将数组序列化为一个字符串
         redisTemplate.opsForValue().set(key,dishDtoList,60, TimeUnit.MINUTES);
 
         return R.success(dishDtoList);
