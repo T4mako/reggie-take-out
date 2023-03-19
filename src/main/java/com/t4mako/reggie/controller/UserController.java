@@ -3,6 +3,7 @@ package com.t4mako.reggie.controller;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.t4mako.reggie.common.BaseContext;
+import com.t4mako.reggie.common.CustomException;
 import com.t4mako.reggie.common.R;
 import com.t4mako.reggie.entity.User;
 import com.t4mako.reggie.service.UserService;
@@ -41,6 +42,10 @@ public class UserController {
         //获取手机号
         String phone = user.getPhone();
         if(StringUtils.isNotBlank(phone)){
+            //如果获取过验证码，且验证码没过期，不允许重新获取
+            if(redisTemplate.opsForValue().get(phone) != null){
+                throw new CustomException("已获取验证码，请稍后获取");
+            }
             //生成随机四位验证码
             String code = ValidateCodeUtils.generateValidateCode(4).toString();
             log.info("验证码={}",code);
