@@ -94,8 +94,9 @@ public class ShoppingCartController {
         }
         ShoppingCart cartServiceOne = shoppingCartService.getOne(queryWrapper);
         int number = cartServiceOne.getNumber();
-        //如果number为1，删除购物车
+        //如果number为1，number - 1,并删除购物车
         if(number == 1){
+            cartServiceOne.setNumber(cartServiceOne.getNumber() - 1);
             shoppingCartService.remove(queryWrapper);
         }else {
             //如果>1，number-1
