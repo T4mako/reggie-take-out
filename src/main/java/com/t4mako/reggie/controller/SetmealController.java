@@ -1,13 +1,16 @@
 package com.t4mako.reggie.controller;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.t4mako.reggie.common.R;
 import com.t4mako.reggie.dto.SetmealDto;
 import com.t4mako.reggie.entity.Category;
+import com.t4mako.reggie.entity.Dish;
 import com.t4mako.reggie.entity.Setmeal;
 import com.t4mako.reggie.entity.SetmealDish;
 import com.t4mako.reggie.service.CategoryService;
+import com.t4mako.reggie.service.DishService;
 import com.t4mako.reggie.service.SetmealDishService;
 import com.t4mako.reggie.service.SetmealService;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +22,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 import javax.xml.ws.Service;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -131,7 +135,7 @@ public class SetmealController {
     }
 
     //根据条件查询套餐数据
-    @GetMapping("list")
+    @GetMapping("/list")
     @Cacheable(value = "setmealCache" , key = "#setmeal.categoryId + '_' + #setmeal.status")
     public R<List<Setmeal>> list(Setmeal setmeal){
         LambdaQueryWrapper<Setmeal> queryWrapper = new LambdaQueryWrapper<>();
@@ -139,6 +143,15 @@ public class SetmealController {
         queryWrapper.eq(setmeal.getStatus() != null,Setmeal::getStatus,1);
         queryWrapper.orderByDesc(Setmeal::getUpdateTime);
         List<Setmeal> list = setmealService.list(queryWrapper);
+        return R.success(list);
+    }
+
+    //点击套餐显示详情
+    @GetMapping("/dish/{id}")
+    public R<List<SetmealDish>> dish(@PathVariable Long id){
+        LambdaQueryWrapper<SetmealDish> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(SetmealDish::getSetmealId,id);
+        List<SetmealDish> list = setmealDishService.list(queryWrapper);
         return R.success(list);
     }
 }
